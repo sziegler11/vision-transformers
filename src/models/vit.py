@@ -123,7 +123,8 @@ class VisionTransfomer(nn.Module):
       num_blocks,
       num_classes,
       mlp_dim,
-      channels = 3
+      channels = 3,
+      dropout = 0.2
   ):
     super().__init__()
     # I assume square images, square patches for simplicity.
@@ -143,7 +144,8 @@ class VisionTransfomer(nn.Module):
         embed_dim=self.embed_dim,
         n_heads=num_heads,
         mlp_dim=mlp_dim,
-        num_blocks=num_blocks
+        num_blocks=num_blocks,
+        dropout=dropout
     )
     self.head = MLPHead(self.embed_dim, num_classes)
 
@@ -156,7 +158,7 @@ class VisionTransfomer(nn.Module):
         axis=1
     )
 
-    pos_embed = self.pos_embed(torch.arange(self.seq_length+1))
+    pos_embed = self.pos_embed(torch.arange(self.seq_length+1, device=x.device))
     x = seq_embed + pos_embed # B x seq_length x embed_dim
     x = self.encoder(x)
 
