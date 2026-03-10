@@ -5,6 +5,7 @@ import torch
 from torch import nn
 
 from src.training.metrics import MetricsTracker
+from src.utils import get_device
 
 
 class Trainer:
@@ -15,7 +16,7 @@ class Trainer:
         self.config = config
         self.train_loader = train_loader
         self.val_loader = val_loader
-        self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = get_device(device)
         self.model.to(self.device)
 
     def _build_optimizer(self):
@@ -69,8 +70,8 @@ class Trainer:
 
         with torch.set_grad_enabled(is_train):
             for images, labels in loader:
-                images = images.to(self.device)
-                labels = labels.to(self.device)
+                images = images.to(self.device, non_blocking=True)
+                labels = labels.to(self.device, non_blocking=True)
 
                 logits = self.model(images)
                 loss = criterion(logits, labels)
@@ -91,6 +92,8 @@ class Trainer:
     def train(self):
         """Run the full training loop and return a MetricsTracker."""
         torch.manual_seed(self.config.seed)
+        if torch.cuda.is_available():
+            torch.cuda.manual_seed_all(self.config.seed)
 
         optimizer = self._build_optimizer()
         scheduler = self._build_scheduler(optimizer)

@@ -2,6 +2,8 @@ import torch
 from torch.utils.data import DataLoader, random_split
 from torchvision import datasets, transforms
 
+from src.utils import get_device
+
 
 def get_dataloaders(config):
     """
@@ -9,7 +11,7 @@ def get_dataloaders(config):
 
     Args:
         config: ExperimentConfig with dataset, image_size, batch_size,
-                augmentation, and seed fields.
+                augmentation, device, and seed fields.
 
     Returns:
         (train_loader, val_loader) tuple of DataLoaders.
@@ -52,18 +54,23 @@ def get_dataloaders(config):
 
     generator = torch.Generator().manual_seed(config.seed)
 
+    device = get_device(getattr(config, "device", "auto"))
+    use_pin_memory = device != "cpu"
+
     train_loader = DataLoader(
         train_dataset,
         batch_size=config.batch_size,
         shuffle=True,
         generator=generator,
         num_workers=0,
+        pin_memory=use_pin_memory,
     )
     val_loader = DataLoader(
         val_dataset,
         batch_size=config.batch_size,
         shuffle=False,
         num_workers=0,
+        pin_memory=use_pin_memory,
     )
 
     return train_loader, val_loader

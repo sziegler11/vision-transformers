@@ -3,14 +3,13 @@ import logging
 import os
 from dataclasses import dataclass, asdict
 
-import torch
-
 from src.agents.base import BaseAgent
 from src.data.datasets import get_dataloaders
 from src.models.vit import VisionTransfomer
 from src.training.config import ExperimentConfig
 from src.training.metrics import MetricsTracker
 from src.training.trainer import Trainer
+from src.utils import get_device
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +37,7 @@ class TrainingAgent(BaseAgent):
 
     def __init__(self, device=None, **kwargs):
         super().__init__(**kwargs)
-        self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = get_device(device)
 
     def run_experiment(self, config: ExperimentConfig) -> ExperimentResult:
         """Build model from config, train it, and return structured results.

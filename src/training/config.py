@@ -33,6 +33,9 @@ class ExperimentConfig:
     experiment_name: str = "default"
     seed: int = 42
 
+    # Infrastructure
+    device: str = "auto"  # "auto", "cpu", or "cuda"
+
     def to_dict(self) -> dict:
         return asdict(self)
 
